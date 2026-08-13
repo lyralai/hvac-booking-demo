@@ -3,606 +3,1180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Cascade Heating Demo — AI Booking Assistant</title>
+<title>HVAC Lead Recovery Assistant</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  
+  :root {
+    --ink: #172033;
+    --muted: #687386;
+    --line: #d8dee8;
+    --soft: #f4f7fb;
+    --paper: #ffffff;
+    --brand: #c7352f;
+    --brand-dark: #8f211e;
+    --heat: #f08a24;
+    --cool: #2188d9;
+    --good: #1f9b62;
+    --warn: #ca8a04;
+    --night: #121928;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
   body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    background: #0f172a;
-    color: #e2e8f0;
-    display: flex;
+    margin: 0;
     min-height: 100vh;
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    color: var(--ink);
+    background: var(--soft);
+    overflow-x: hidden;
   }
 
-  /* ---- LEFT PANEL: The "Website" ---- */
-  .site-preview {
-    flex: 1;
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background: linear-gradient(135deg, #1e293b 0%,, #0f172a 100%);
+  button,
+  input {
+    font: inherit;
   }
 
-  .browser-bar {
-    width: 100%;
-    max-width: 600px;
-    background: #1e293b;
-    border-radius: 10px 10px 0 0;
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    border: 1px solid #334155;
-    border-bottom: none;
-  }
-  .browser-dot { width: 12px; height: 12px; border-radius: 50%; }
-  .dot-red { background: #ef4444; }
-  .dot-yellow { background: #eab308; }
-  .dot-green { background: #22c55e; }
-  .browser-url {
-    flex: 1;
-    background: #0f172a;
-    border-radius: 6px;
-    padding: 6px 12px;
-    font-size: 12px;
-    color: #94a3b8;
-    margin-left: 8px;
-  }
-
-  .site-content {
-    width: 100%;
-    max-width: 600px;
-    background: white;
-    border-radius: 0 0 10px 10px;
-    overflow: hidden;
-    border: 1px solid #334155;
-    border-top: none;
-    min-height: 500px;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .site-header {
-    background: linear-gradient(135deg, #dc2626, #991b1b);
-    color: white;
-    padding: 20px 24px;
-  }
-  .site-header h1 { font-size: 20px; font-weight: 700; }
-  .site-header p { font-size: 13px; opacity: 0.9; margin-top: 2px; }
-  .site-nav {
-    background: #7f1d1d;
-    padding: 8px 24px;
-    display: flex;
-    gap: 20px;
-  }
-  .site-nav span { color: #fecaca; font-size: 12px; }
-
-  .site-body { padding: 24px; color: #1e293b; flex: 1; }
-  .site-body h2 { font-size: 18px; margin-bottom: 8px; }
-  .site-body p { font-size: 14px; line-height: 1.6; color: #475569; margin-bottom: 16px; }
-  .cta-btn {
-    display: inline-block;
-    background: #dc2626;
-    color: white;
-    padding: 12px 28px;
-    border-radius: 6px;
-    font-weight: 600;
-    font-size: 14px;
-    border: none;
+  button {
     cursor: pointer;
   }
 
-  /* ---- CHAT WIDGET ---- */
-  .chat-widget {
-    position: relative;
-    width: 320px;
-    margin: 0 auto;
-    background: #1e293b;
-    border-radius: 12px;
-    border: 1px solid #334155;
-    display: flex;
-    flex-direction: column;
-    height: 520px;
-    overflow: hidden;
-    box-shadow: 0 25px 50px rgba(0,0,0,0.5);
+  .app {
+    min-height: 100vh;
+    display: grid;
+    grid-template-rows: auto auto 1fr;
   }
 
-  .chat-header {
-    background: linear-gradient(135deg, #dc2626, #991b1b);
+  .topbar {
+    background: var(--night);
+    color: white;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .topbar-inner {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+  }
+
+  .brand-lockup {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 260px;
+  }
+
+  .brand-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--brand), var(--heat));
+    display: grid;
+    place-items: center;
+    font-weight: 800;
+    color: white;
+  }
+
+  .brand-copy h1 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.1;
+  }
+
+  .brand-copy {
+    min-width: 0;
+  }
+
+  .brand-copy p {
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #cbd5e1;
+  }
+
+  .top-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .pill {
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.06);
+    color: #e5edf7;
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .status-light {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--good);
+    box-shadow: 0 0 0 4px rgba(31, 155, 98, 0.18);
+  }
+
+  .metric-strip {
+    background: white;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .metric-inner {
+    max-width: 1500px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(160px, 1fr));
+    gap: 12px;
+  }
+
+  .metric {
+    display: grid;
+    gap: 4px;
+    min-height: 72px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: #fbfcfe;
+    padding: 12px;
+  }
+
+  .metric strong {
+    font-size: 22px;
+    line-height: 1;
+  }
+
+  .metric span {
+    color: var(--muted);
+    font-size: 13px;
+  }
+
+  .workspace {
+    max-width: 1500px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 18px 24px 28px;
+    display: grid;
+    grid-template-columns: minmax(280px, 0.9fr) minmax(340px, 1fr) minmax(320px, 0.9fr);
+    gap: 16px;
+    align-items: stretch;
+  }
+
+  .panel {
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    min-width: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .panel-head {
     padding: 14px 16px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .panel-head h2 {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .panel-head small {
+    color: var(--muted);
+    font-size: 12px;
+  }
+
+  .site-preview {
+    min-height: 590px;
+    background: #f8fafc;
+  }
+
+  .fake-site-header {
+    background: #171f2f;
+    color: white;
+    padding: 18px 18px 0;
+  }
+
+  .fake-site-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 16px;
+  }
+
+  .company-name {
     display: flex;
     align-items: center;
     gap: 10px;
+    font-weight: 800;
   }
-  .chat-avatar {
-    width: 36px; height: 36px;
-    background: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-  }
-  .chat-header-info h3 { font-size: 14px; font-weight: 600; color: white; }
-  .chat-header-info p { font-size: 11px; color: #fecaca; display: flex; align-items: center; gap: 4px; }
-  .status-dot { width: 8px; height: 8px; background: #22c55e; border-radius: 50%; display: inline-block; }
 
-  .chat-messages {
+  .company-mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: linear-gradient(135deg, var(--brand), var(--cool));
+    display: grid;
+    place-items: center;
+    color: white;
+    font-weight: 800;
+  }
+
+  .fake-links {
+    display: flex;
+    gap: 12px;
+    color: #dbe5f3;
+    font-size: 12px;
+  }
+
+  .fake-hero {
+    background: linear-gradient(135deg, #202b3f, #111827);
+    color: white;
+    padding: 20px 18px 22px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .fake-hero h3 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.05;
+    max-width: 420px;
+    overflow-wrap: break-word;
+  }
+
+  .fake-hero p {
+    margin: 0;
+    color: #cbd5e1;
+    line-height: 1.45;
+    max-width: 480px;
+    overflow-wrap: break-word;
+  }
+
+  .fake-site-body {
+    padding: 16px;
+    display: grid;
+    gap: 12px;
+  }
+
+  .service-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .service-tile {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: white;
+    min-height: 96px;
+  }
+
+  .service-tile strong {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 14px;
+  }
+
+  .service-tile span {
+    color: var(--muted);
+    font-size: 12px;
+    line-height: 1.35;
+  }
+
+  .review-strip {
+    border: 1px solid #f0d9b8;
+    background: #fffbeb;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 13px;
+    color: #65420f;
+  }
+
+  .chat-card {
+    margin-top: auto;
+    padding: 14px 16px 16px;
+    border-top: 1px solid var(--line);
+    background: white;
+  }
+
+  .chat-button-preview {
+    width: 100%;
+    min-height: 46px;
+    border: 0;
+    background: var(--brand);
+    color: white;
+    border-radius: 8px;
+    font-weight: 800;
+  }
+
+  .chat-panel {
+    min-height: 590px;
+  }
+
+  .scenario-row {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .scenario-btn {
+    min-height: 44px;
+    border: 1px solid var(--line);
+    background: #f8fafc;
+    color: var(--ink);
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .scenario-btn:hover {
+    border-color: var(--brand);
+    background: #fff5f4;
+  }
+
+  .messages {
     flex: 1;
+    min-height: 360px;
+    max-height: 430px;
     overflow-y: auto;
     padding: 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    background:
+      linear-gradient(rgba(248, 250, 252, 0.94), rgba(248, 250, 252, 0.94)),
+      repeating-linear-gradient(90deg, transparent 0, transparent 23px, rgba(33, 136, 217, 0.08) 24px);
   }
 
-  .msg {
-    max-width: 80%;
-    padding: 10px 14px;
-    border-radius: 14px;
-    font-size: 13px;
-    line-height: 1.5;
-    animation: fadeUp 0.3s ease;
-  }
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-
-  .msg-bot {
-    background: #334155;
-    color: #e2e8f0;
-    border-bottom-left-radius: 4px;
-    align-self: flex-start;
-  }
-  .msg-user {
-    background: #dc2626;
-    color: white;
-    border-bottom-right-radius: 4px;
-    align-self: flex-end;
-  }
-  .msg-system {
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-    border: 1px solid rgba(34, 197, 94, 0.3);
+  .message {
+    max-width: 86%;
     border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 14px;
+    line-height: 1.42;
+    white-space: pre-line;
+  }
+
+  .bot {
+    align-self: flex-start;
+    background: white;
+    border: 1px solid var(--line);
+  }
+
+  .user {
+    align-self: flex-end;
+    color: white;
+    background: var(--brand);
+  }
+
+  .system {
     align-self: center;
+    max-width: 100%;
+    background: #ecfdf5;
+    color: #166534;
+    border: 1px solid #bbf7d0;
     text-align: center;
     font-size: 12px;
-    padding: 8px 16px;
+    font-weight: 700;
   }
 
   .quick-replies {
-    padding: 8px 12px;
+    padding: 12px 14px;
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    border-top: 1px solid #334155;
+    gap: 8px;
+    border-top: 1px solid var(--line);
   }
-  .qr-btn {
-    background: #334155;
-    border: 1px solid #475569;
-    color: #e2e8f0;
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
+
+  .quick-replies button {
+    min-height: 36px;
+    border: 1px solid var(--line);
+    background: white;
+    border-radius: 999px;
+    padding: 0 12px;
+    color: var(--ink);
+    font-size: 13px;
   }
-  .qr-btn:hover { background: #475569; border-color: #64748b; }
 
   .chat-input {
-    padding: 10px 12px;
-    border-top: 1px solid #334155;
+    border-top: 1px solid var(--line);
+    padding: 12px 14px;
     display: flex;
     gap: 8px;
   }
+
   .chat-input input {
     flex: 1;
-    background: #0f172a;
-    border: 1px solid #334155;
-    color: #e2e8f0;
-    padding: 8px 12px;
+    min-width: 0;
+    height: 42px;
+    border: 1px solid var(--line);
     border-radius: 8px;
-    font-size: 13px;
+    padding: 0 12px;
     outline: none;
   }
-  .chat-input input:focus { border-color: #dc2626; }
-  .chat-input button {
-    background: #dc2626;
+
+  .chat-input input:focus {
+    border-color: var(--cool);
+    box-shadow: 0 0 0 3px rgba(33, 136, 217, 0.12);
+  }
+
+  .send-btn {
+    width: 82px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--ink);
     color: white;
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    cursor: pointer;
-    font-weight: 600;
+    font-weight: 800;
   }
 
-  /* ---- RIGHT PANEL: Live Stats ---- */
-  .stats-panel {
-    width: 280px;
-    background: #1e293b;
-    border-left: 1px solid #334155;
-    padding: 24px;
+  .dashboard {
+    min-height: 590px;
   }
-  .stats-panel h3 { font-size: 14px; font-weight: 600; margin-bottom: 16px; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; }
-  .stat-card {
-    background: #0f172a;
-    border-radius: 8px;
+
+  .dashboard-body {
     padding: 14px;
-    margin-bottom: 12px;
-    border: 1px solid #334155;
+    display: grid;
+    gap: 12px;
+    overflow-y: auto;
   }
-  .stat-value { font-size: 24px; font-weight: 700; color: #4ade80; }
-  .stat-label { font-size: 11px; color: #94a3b8; margin-top: 2px; }
-  .stat-value.red { color: #f87171; }
-  .stat-value.yellow { color: #fbbf24; }
 
-  .lead-list {
-    margin-top: 16px;
+  .lead-summary {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12px;
+    background: #fbfcfe;
+    display: grid;
+    gap: 10px;
   }
-  .lead-item {
-    background: #0f172a;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    padding: 8px 10px;
-    margin-bottom: 6px;
+
+  .lead-title {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .lead-title strong {
+    font-size: 15px;
+  }
+
+  .tag {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+    border-radius: 999px;
+    padding: 0 9px;
+    background: #e0f2fe;
+    color: #075985;
+    font-size: 12px;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+
+  .tag.hot {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .detail-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .detail {
+    border: 1px solid var(--line);
+    background: white;
+    border-radius: 8px;
+    padding: 10px;
+    min-height: 64px;
+  }
+
+  .detail span {
+    display: block;
+    color: var(--muted);
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .detail strong {
+    font-size: 13px;
+  }
+
+  .workflow {
+    display: grid;
+    gap: 8px;
+  }
+
+  .step {
+    display: grid;
+    grid-template-columns: 22px 1fr auto;
+    gap: 8px;
+    align-items: center;
+    min-height: 34px;
+    font-size: 13px;
+  }
+
+  .dot {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    background: white;
+  }
+
+  .step.done .dot {
+    border-color: var(--good);
+    background: var(--good);
+  }
+
+  .step.active .dot {
+    border-color: var(--warn);
+    background: #fef3c7;
+  }
+
+  .step-status {
+    color: var(--muted);
     font-size: 12px;
   }
-  .lead-item .lead-name { font-weight: 600; color: #e2e8f0; }
-  .lead-item .lead-info { color: #64748b; margin-top: 2px; }
-  .lead-item .lead-tag {
-    display: inline-block;
-    background: rgba(34, 197, 94, 0.15);
-    color: #4ade80;
-    font-size: 10px;
-    padding: 2px 6px;
-    border-radius: 4px;
-    margin-top: 4px;
+
+  .dispatch-box {
+    border: 1px solid #b8d7f0;
+    border-radius: 8px;
+    background: #eff8ff;
+    padding: 12px;
+    display: grid;
+    gap: 8px;
   }
 
-  /* ---- DEMO LABEL ---- */
-  .demo-label {
-    position: fixed;
-    top: 12px;
-    right: 12px;
-    background: #fbbf24;
-    color: #0f172a;
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 10px;
-    border-radius: 4px;
-    z-index: 100;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
+  .dispatch-box h3 {
+    margin: 0;
+    font-size: 14px;
   }
 
-  .typing-indicator {
-    align-self: flex-start;
-    background: #334155;
-    padding: 12px 16px;
-    border-radius: 14px;
-    border-bottom-left-radius: 4px;
-    display: none;
+  .dispatch-box pre {
+    margin: 0;
+    white-space: pre-wrap;
+    font-size: 12px;
+    line-height: 1.45;
+    color: #12324c;
   }
-  .typing-indicator span {
-    display: inline-block;
-    width: 6px; height: 6px;
-    background: #64748b;
-    border-radius: 50%;
-    margin: 0 2px;
-    animation: bounce 1.4s infinite;
+
+  .roi-box {
+    border: 1px solid #f0d9b8;
+    border-radius: 8px;
+    background: #fff8e8;
+    padding: 12px;
+    display: grid;
+    gap: 8px;
   }
-  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-  @keyframes bounce {
-    0%, 60%, 100% { transform: translateY(0); }
-    30% { transform: translateY(-6px); }
+
+  .roi-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 13px;
+  }
+
+  .roi-row strong {
+    color: #7a4a04;
+  }
+
+  .owner-note {
+    border-left: 4px solid var(--brand);
+    background: #fff7f7;
+    padding: 12px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    line-height: 1.45;
+    color: #5f2724;
+  }
+
+  @media (max-width: 1120px) {
+    .workspace {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .dashboard {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 760px) {
+    .topbar-inner,
+    .metric-inner,
+    .workspace {
+      padding-left: 14px;
+      padding-right: 14px;
+      max-width: 100%;
+    }
+
+    .topbar-inner {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .brand-lockup {
+      min-width: 0;
+      width: 100%;
+    }
+
+    .brand-copy h1 {
+      font-size: 17px;
+    }
+
+    .brand-copy p {
+      max-width: 250px;
+      font-size: 12px;
+      line-height: 1.3;
+    }
+
+    .panel-head {
+      align-items: flex-start;
+      flex-wrap: wrap;
+      flex-direction: column;
+    }
+
+    .top-actions {
+      justify-content: flex-start;
+    }
+
+    .metric-inner,
+    .workspace {
+      grid-template-columns: 1fr;
+    }
+
+    .panel {
+      max-width: calc(100vw - 28px);
+    }
+
+    .fake-links {
+      display: none;
+    }
+
+    .company-name {
+      min-width: 0;
+    }
+
+    .company-name span {
+      overflow-wrap: anywhere;
+    }
+
+    .fake-hero h3 {
+      font-size: 21px;
+      line-height: 1.12;
+      max-width: 290px;
+    }
+
+    .fake-hero p {
+      max-width: 290px;
+      font-size: 15px;
+    }
+
+    .service-grid,
+    .detail-grid,
+    .scenario-row {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 </head>
 <body>
-
-<div class="demo-label">⚡ Live Demo</div>
-
-<!-- LEFT: Website + Chat -->
-<div class="site-preview">
-  <div style="display: flex; gap: 20px; align-items: flex-start; flex-wrap: wrap;">
-    
-    <!-- Fake Website -->
-    <div style="flex: 1; min-width: 320px;">
-      <div class="browser-bar">
-        <div class="browser-dot dot-red"></div>
-        <div class="browser-dot dot-yellow"></div>
-        <div class="browser-dot dot-green"></div>
-        <div class="browser-url">🔒 cascadeheatingwa.com</div>
+<div class="app">
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-lockup">
+        <div class="brand-mark">HV</div>
+        <div class="brand-copy">
+          <h1>HVAC Lead Recovery Assistant</h1>
+          <p>24/7 booking, triage, and dispatch handoff for home-service teams.</p>
+        </div>
       </div>
-      <div class="site-content">
-        <div class="site-header">
-          <h1>🔥 Cascade Heating & Cooling</h1>
-          <p>Vancouver, WA · Serving Clark County since 2008</p>
-        </div>
-        <div class="site-nav">
-          <span>Services</span>
-          <span>About</span>
-          <span>Reviews</span>
-          <span>Contact</span>
-        </div>
-        <div class="site-body">
-          <h2>Fast, Reliable HVAC Service</h2>
-          <p>Furnace not working? AC dead? Our licensed technicians serve Vancouver and the greater Portland area. Same-day service available.</p>
-          <button class="cta-btn">📞 Call (360) 555-0142</button>
-        </div>
+      <div class="top-actions">
+        <span class="pill status-pill"><span class="status-light"></span>Demo running</span>
+        <span class="pill">Cascade Comfort Systems</span>
+        <span class="pill">Vancouver, WA</span>
       </div>
     </div>
+  </header>
 
-    <!-- Chat Widget -->
-    <div class="chat-widget" id="chatWidget">
-      <div class="chat-header">
-        <div class="chat-avatar">🔥</div>
-        <div class="chat-header-info">
-          <h3>Cascade Heating Assistant</h3>
-          <p><span class="status-dot"></span> Online · Replies instantly</p>
+  <section class="metric-strip">
+    <div class="metric-inner">
+      <div class="metric">
+        <strong id="metricLeads">0</strong>
+        <span>qualified leads captured</span>
+      </div>
+      <div class="metric">
+        <strong id="metricBookings">0</strong>
+        <span>appointments booked</span>
+      </div>
+      <div class="metric">
+        <strong id="metricResponse">12s</strong>
+        <span>average first response</span>
+      </div>
+      <div class="metric">
+        <strong id="metricRevenue">$0</strong>
+        <span>estimated revenue recovered</span>
+      </div>
+    </div>
+  </section>
+
+  <main class="workspace">
+    <section class="panel site-preview">
+      <div class="panel-head">
+        <div>
+          <h2>Customer Website</h2>
+          <small>What the homeowner sees</small>
+        </div>
+        <span class="tag">embedded widget</span>
+      </div>
+
+      <div class="fake-site-header">
+        <div class="fake-site-nav">
+          <div class="company-name">
+            <div class="company-mark">CC</div>
+            <span>Cascade Comfort Systems</span>
+          </div>
+          <div class="fake-links">
+            <span>Repair</span>
+            <span>Maintenance</span>
+            <span>Reviews</span>
+          </div>
         </div>
       </div>
-      <div class="chat-messages" id="messages">
-        <div class="msg msg-bot">
-          👋 Hi! I'm the Cascade Heating virtual assistant. How can I help you today?
+
+      <div class="fake-hero">
+        <h3>Heating and cooling service before the next dispatch window fills.</h3>
+        <p>Licensed technicians for furnace repair, AC service, heat pumps, maintenance, and emergency triage across Clark County.</p>
+      </div>
+
+      <div class="fake-site-body">
+        <div class="service-grid">
+          <div class="service-tile">
+            <strong>No heat</strong>
+            <span>Prioritized winter triage with emergency escalation.</span>
+          </div>
+          <div class="service-tile">
+            <strong>AC trouble</strong>
+            <span>Leak, weak airflow, short cycling, and repair booking.</span>
+          </div>
+          <div class="service-tile">
+            <strong>Annual tune-up</strong>
+            <span>Maintenance slots routed into the right calendar window.</span>
+          </div>
+          <div class="service-tile">
+            <strong>Replacement quote</strong>
+            <span>Captures system age, home size, and quote intent.</span>
+          </div>
+        </div>
+        <div class="review-strip">
+          "They answered after hours and had a tech scheduled before breakfast." - local homeowner
         </div>
       </div>
-      <div class="typing-indicator" id="typing">
-        <span></span><span></span><span></span>
+
+      <div class="chat-card">
+        <button class="chat-button-preview" onclick="focusChat()">Book service or ask a question</button>
       </div>
-      <div class="quick-replies" id="quickReplies">
-        <button class="qr-btn" onclick="userSays('My furnace isn\'t working')">🔥 Furnace issue</button>
-        <button class="qr-btn" onclick="userSays('I need to book an appointment')">📅 Book service</button>
-        <button class="qr-btn" onclick="userSays('What are your hours?')">🕐 Hours</button>
-        <button class="qr-btn" onclick="userSays('How much do you charge?')">💰 Pricing</button>
+    </section>
+
+    <section class="panel chat-panel">
+      <div class="panel-head">
+        <div>
+          <h2>AI Booking Conversation</h2>
+          <small>Lead qualification, scheduling, and confirmation</small>
+        </div>
+        <button class="scenario-btn" style="min-height: 34px; padding: 0 12px;" onclick="resetDemo()">Reset</button>
       </div>
+
+      <div class="scenario-row">
+        <button class="scenario-btn" onclick="startScenario('no-heat')">No heat after hours</button>
+        <button class="scenario-btn" onclick="startScenario('ac-leak')">AC leaking</button>
+        <button class="scenario-btn" onclick="startScenario('maintenance')">Maintenance tune-up</button>
+        <button class="scenario-btn" onclick="startScenario('quote')">Replacement quote</button>
+      </div>
+
+      <div class="messages" id="messages"></div>
+
+      <div class="quick-replies" id="quickReplies"></div>
+
       <div class="chat-input">
-        <input type="text" id="input" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
-        <button onclick="sendMessage()">Send</button>
+        <input id="chatInput" type="text" placeholder="Type as the homeowner..." autocomplete="off">
+        <button class="send-btn" onclick="sendTyped()">Send</button>
       </div>
-    </div>
-  </div>
-</div>
+    </section>
 
-<!-- RIGHT: Stats Panel -->
-<div class="stats-panel">
-  <h3>📊 Live Dashboard</h3>
-  
-  <div class="stat-card">
-    <div class="stat-value" id="leadCount">0</div>
-    <div class="stat-label">Leads captured (this week)</div>
-  </div>
-  
-  <div class="stat-card">
-    <div class="stat-value" id="bookingCount">0</div>
-    <div class="stat-label">Appointments booked</div>
-  </div>
-  
-  <div class="stat-card">
-    <div class="stat-value yellow" id="afterHoursCount">0</div>
-    <div class="stat-label">After-hours leads saved</div>
-  </div>
+    <section class="panel dashboard">
+      <div class="panel-head">
+        <div>
+          <h2>Owner Dashboard</h2>
+          <small>What the HVAC office receives</small>
+        </div>
+        <span class="tag hot" id="urgencyTag">waiting</span>
+      </div>
 
-  <div class="stat-card">
-    <div class="stat-value red" id="recoveryAmount">$0</div>
-    <div class="stat-label">Revenue recovered</div>
-  </div>
+      <div class="dashboard-body">
+        <div class="owner-note">
+          The sell is simple: the assistant answers instantly when the office is closed, qualifies the job, books the slot, and sends dispatch a clean summary.
+        </div>
 
-  <h3 style="margin-top: 20px;">📋 Recent Leads</h3>
-  <div class="lead-list" id="leadList">
-    <div style="font-size: 12px; color: #64748b; text-align: center; padding: 12px;">
-      Interact with the chat to see leads appear
-    </div>
-  </div>
+        <div class="lead-summary">
+          <div class="lead-title">
+            <strong id="leadName">No active lead</strong>
+            <span class="tag" id="leadStage">idle</span>
+          </div>
+          <div class="detail-grid">
+            <div class="detail">
+              <span>Issue</span>
+              <strong id="leadIssue">-</strong>
+            </div>
+            <div class="detail">
+              <span>Phone</span>
+              <strong id="leadPhone">-</strong>
+            </div>
+            <div class="detail">
+              <span>Address</span>
+              <strong id="leadAddress">-</strong>
+            </div>
+            <div class="detail">
+              <span>Booked slot</span>
+              <strong id="leadSlot">-</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="lead-summary">
+          <div class="lead-title">
+            <strong>Workflow</strong>
+            <span class="tag" id="workflowTag">live</span>
+          </div>
+          <div class="workflow" id="workflow"></div>
+        </div>
+
+        <div class="dispatch-box">
+          <h3>Dispatch packet</h3>
+          <pre id="dispatchPacket">Waiting for a homeowner conversation.</pre>
+        </div>
+
+        <div class="roi-box">
+          <div class="roi-row"><span>Demo plan price</span><strong>$399/mo</strong></div>
+          <div class="roi-row"><span>Estimated value of captured jobs</span><strong id="roiValue">$0</strong></div>
+          <div class="roi-row"><span>Break-even</span><strong>one small repair</strong></div>
+          <div class="roi-row"><span>Best pitch</span><strong>missed call recovery</strong></div>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
 
 <script>
-  let state = {
-    leads: [],
-    bookings: 0,
-    afterHours: 0,
-    revenue: 0,
-    conversationStage: 'initial',
-    prospectName: null,
-    prospectPhone: null,
-    prospectIssue: null
+  const scenarios = {
+    "no-heat": {
+      issue: "No heat / furnace not starting",
+      urgency: "Priority",
+      value: 950,
+      first: "My heat stopped working and it is getting cold in the house.",
+      slot: "Tomorrow, 8:00-10:00 AM",
+      replies: ["My name is Mark", "(360) 555-0184", "11812 NE 32nd St", "Yes, book it"]
+    },
+    "ac-leak": {
+      issue: "AC leaking water near indoor unit",
+      urgency: "Same day",
+      value: 680,
+      first: "My AC is leaking water near the unit.",
+      slot: "Today, 3:00-5:00 PM",
+      replies: ["Sarah Patel", "(503) 555-0129", "8420 SE Stark St", "Yes"]
+    },
+    "maintenance": {
+      issue: "Annual heating and cooling tune-up",
+      urgency: "Routine",
+      value: 189,
+      first: "I want to schedule annual maintenance.",
+      slot: "Friday, 10:00 AM-12:00 PM",
+      replies: ["Jenny", "(360) 555-0131", "2218 Main St", "That works"]
+    },
+    "quote": {
+      issue: "Replacement quote for aging heat pump",
+      urgency: "Sales",
+      value: 4200,
+      first: "I think our heat pump needs to be replaced. Can someone quote it?",
+      slot: "Thursday, 2:00-4:00 PM",
+      replies: ["Rob", "(360) 555-0155", "9901 NE 88th Way", "Yes please"]
+    }
   };
 
-  function addMessage(text, type = 'bot') {
-    const msg = document.createElement('div');
-    msg.className = `msg msg-${type}`;
-    msg.textContent = text;
-    document.getElementById('messages').appendChild(msg);
-    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+  const steps = [
+    "Lead captured",
+    "Issue classified",
+    "Contact collected",
+    "Address collected",
+    "Appointment booked",
+    "Dispatch packet sent",
+    "SMS confirmation queued"
+  ];
+
+  let state = {};
+
+  function resetState() {
+    state = {
+      stage: "idle",
+      scenarioKey: null,
+      lead: {
+        name: "-",
+        phone: "-",
+        address: "-",
+        issue: "-",
+        urgency: "waiting",
+        slot: "-"
+      },
+      metrics: {
+        leads: 0,
+        bookings: 0,
+        revenue: 0
+      },
+      completedSteps: 0
+    };
   }
 
-  function showTyping() {
-    document.getElementById('typing').style.display = 'block';
-    document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-  }
-  function hideTyping() {
-    document.getElementById('typing').style.display = 'none';
-  }
-
-  function addLead(name, phone, issue, afterHours = false) {
-    state.leads.push({ name, phone, issue, time: new Date().toLocaleTimeString() });
-    if (afterHours) state.afterHours++;
-    
-    // Estimate revenue based on issue
-    const revenueMap = { 'furnace': 850, 'ac': 650, 'maintenance': 180, 'installation': 4200, 'general': 400 };
-    let rev = 400;
-    for (let key in revenueMap) {
-      if (issue.toLowerCase().includes(key)) { rev = revenueMap[key]; break; }
-    }
-    state.revenue += rev;
-    updateStats();
-    
-    // Add to lead list
-    const list = document.getElementById('leadList');
-    list.innerHTML = '';
-    state.leads.slice(-5).reverse().forEach(lead => {
-      const div = document.createElement('div');
-      div.className = 'lead-item';
-      div.innerHTML = `
-        <div class="lead-name">${lead.name}</div>
-        <div class="lead-info">${lead.issue} · ${lead.phone}</div>
-        <div class="lead-tag">✅ Captured · ${lead.time}</div>
-      `;
-      list.appendChild(div);
+  function setQuickReplies(items) {
+    const wrap = document.getElementById("quickReplies");
+    wrap.innerHTML = "";
+    items.forEach(item => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = item.label;
+      button.addEventListener("click", () => {
+        addMessage(item.value || item.label, "user");
+        handleText(item.value || item.label);
+      });
+      wrap.appendChild(button);
     });
   }
 
-  function updateStats() {
-    document.getElementById('leadCount').textContent = state.leads.length;
-    document.getElementById('bookingCount').textContent = state.bookings;
-    document.getElementById('afterHoursCount').textContent = state.afterHours;
-    document.getElementById('recoveryAmount').textContent = '$' + state.revenue.toLocaleString();
+  function addMessage(text, type) {
+    const div = document.createElement("div");
+    div.className = "message " + type;
+    div.textContent = text;
+    document.getElementById("messages").appendChild(div);
+    const messages = document.getElementById("messages");
+    messages.scrollTop = messages.scrollHeight;
   }
 
-  function botReply(text) {
-    showTyping();
-    setTimeout(() => {
-      hideTyping();
-      addMessage(text, 'bot');
-    }, 800 + Math.random() * 600);
+  function bot(text) {
+    window.setTimeout(() => addMessage(text, "bot"), 220);
   }
 
-  function systemMessage(text) {
-    setTimeout(() => {
-      const msg = document.createElement('div');
-      msg.className = 'msg msg-system';
-      msg.innerHTML = text;
-      document.getElementById('messages').appendChild(msg);
-      document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
-    }, 200);
+  function system(text) {
+    window.setTimeout(() => addMessage(text, "system"), 140);
   }
 
-  function userSays(text) {
-    addMessage(text, 'user');
-    handleIntent(text);
+  function updateWorkflow() {
+    const wrap = document.getElementById("workflow");
+    wrap.innerHTML = "";
+    steps.forEach((step, index) => {
+      const div = document.createElement("div");
+      const done = index < state.completedSteps;
+      const active = index === state.completedSteps && state.completedSteps < steps.length;
+      div.className = "step" + (done ? " done" : active ? " active" : "");
+
+      const dot = document.createElement("span");
+      dot.className = "dot";
+      const label = document.createElement("span");
+      label.textContent = step;
+      const status = document.createElement("span");
+      status.className = "step-status";
+      status.textContent = done ? "done" : active ? "now" : "next";
+
+      div.appendChild(dot);
+      div.appendChild(label);
+      div.appendChild(status);
+      wrap.appendChild(div);
+    });
   }
 
-  function sendMessage() {
-    const input = document.getElementById('input');
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = '';
-    addMessage(text, 'user');
-    handleIntent(text);
+  function updateDashboard() {
+    document.getElementById("metricLeads").textContent = state.metrics.leads;
+    document.getElementById("metricBookings").textContent = state.metrics.bookings;
+    document.getElementById("metricRevenue").textContent = formatMoney(state.metrics.revenue);
+    document.getElementById("roiValue").textContent = formatMoney(state.metrics.revenue);
+
+    document.getElementById("leadName").textContent = state.lead.name === "-" ? "No active lead" : state.lead.name;
+    document.getElementById("leadIssue").textContent = state.lead.issue;
+    document.getElementById("leadPhone").textContent = state.lead.phone;
+    document.getElementById("leadAddress").textContent = state.lead.address;
+    document.getElementById("leadSlot").textContent = state.lead.slot;
+    document.getElementById("urgencyTag").textContent = state.lead.urgency;
+    document.getElementById("leadStage").textContent = state.stage;
+
+    const packet = document.getElementById("dispatchPacket");
+    if (state.stage === "idle") {
+      packet.textContent = "Waiting for a homeowner conversation.";
+    } else {
+      packet.textContent =
+        "Customer: " + state.lead.name + "\n" +
+        "Phone: " + state.lead.phone + "\n" +
+        "Address: " + state.lead.address + "\n" +
+        "Issue: " + state.lead.issue + "\n" +
+        "Urgency: " + state.lead.urgency + "\n" +
+        "Slot: " + state.lead.slot + "\n" +
+        "Source: website chat\n" +
+        "Owner action: review dispatch board";
+    }
+
+    updateWorkflow();
   }
 
-  function handleIntent(text) {
-    const lower = text.toLowerCase();
+  function formatMoney(value) {
+    return "$" + value.toLocaleString("en-US");
+  }
 
-    // Furnace/HVAC issue
-    if (lower.includes('furnace') || lower.includes('heat') || lower.includes('ac') || lower.includes('air conditioning') || lower.includes('cooling')) {
-      state.prospectIssue = lower.includes('furnace') || lower.includes('heat') ? 'Furnace repair' : 'AC repair';
-      botReply(`Oh no, that's stressful! 🔥❄️ I can get a technician out to you fast. ${state.prospectIssue.includes('Furnace') ? 'We prioritize heating issues, especially in this weather.' : 'AC issues are no fun — we\'ll get you cooled down.'} What's your name?`);
-      state.conversationStage = 'get_name';
+  function startScenario(key) {
+    const scenario = scenarios[key];
+    state.scenarioKey = key;
+    state.stage = "qualifying";
+    state.completedSteps = 1;
+    state.lead.issue = scenario.issue;
+    state.lead.urgency = scenario.urgency;
+    state.lead.slot = scenario.slot;
+    state.metrics.leads = Math.max(state.metrics.leads, 1);
+
+    addMessage(scenario.first, "user");
+    bot("I can help. I am going to get the right dispatch details so the office can route this without another phone call. What is your name?");
+    setQuickReplies([{ label: scenario.replies[0] }]);
+    updateDashboard();
+  }
+
+  function handleText(text) {
+    const scenario = scenarios[state.scenarioKey] || scenarios["no-heat"];
+
+    if (state.stage === "idle") {
+      startScenario("no-heat");
       return;
     }
 
-    // Book appointment
-    if (lower.includes('book') || lower.includes('appointment') || lower.includes('schedule') || lower.includes('service')) {
-      state.prospectIssue = 'Maintenance/service';
-      botReply("I'd be happy to help you book! 📅 We have openings as soon as tomorrow. What's your name?");
-      state.conversationStage = 'get_name';
+    if (state.stage === "qualifying") {
+      state.lead.name = cleanName(text);
+      state.stage = "contact";
+      state.completedSteps = 3;
+      bot("Thanks, " + state.lead.name + ". What is the best phone number for the technician or dispatcher?");
+      setQuickReplies([{ label: scenario.replies[1] }]);
+      updateDashboard();
       return;
     }
 
-    // Hours
-    if (lower.includes('hour') || lower.includes('open') || lower.includes('close')) {
-      botReply("Our technicians are available:\n📅 Mon-Fri: 7am - 7pm\n📅 Saturday: 8am - 5pm\n📅 Sunday: Emergency only\n\nBut I'm here 24/7 to capture your request and get you first in line! Want me to set something up?");
+    if (state.stage === "contact") {
+      state.lead.phone = text.trim();
+      state.stage = "address";
+      state.completedSteps = 4;
+      bot("Got it. What is the service address?");
+      setQuickReplies([{ label: scenario.replies[2] }]);
+      updateDashboard();
       return;
     }
 
-    // Pricing
-    if (lower.includes('price') || lower.includes('cost') || lower.includes('charge') || lower.includes('estimate') || lower.includes('how much')) {
-      botReply("Here's our standard pricing:\n🔧 Service call: $89 (waived if you book repair)\n🔥 Furnace repair: avg $300-$1,200\n❄️ AC repair: avg $250-$900\n🏠 New system quote: FREE\n\nI can get you an exact estimate once a technician inspects it. Want to book a visit?");
+    if (state.stage === "address") {
+      state.lead.address = text.trim();
+      state.stage = "booking";
+      state.completedSteps = 4;
+      bot("I found the best available service window: " + state.lead.slot + ". I can reserve that now and send the details to dispatch. Should I book it?");
+      setQuickReplies([{ label: "Yes, book it", value: scenario.replies[3] }, { label: "Offer another time", value: "Offer another time" }]);
+      updateDashboard();
       return;
     }
 
-    // Emergency
-    if (lower.includes('emergency') || lower.includes('urgent') || lower.includes('now') || lower.includes('asap')) {
-      botReply("🚨 I see this is urgent! I'm flagging this as a priority. Call us right now at (360) 555-0142 for immediate dispatch. I'll also capture your info so the technician knows your situation before they arrive. What's your name?");
-      state.conversationStage = 'get_name';
-      return;
-    }
-
-    // Name collection
-    if (state.conversationStage === 'get_name') {
-      state.prospectName = text.replace(/^my name is /i, '').replace(/^i'?m /i, '').trim();
-      botReply(`Great to meet you, ${state.prospectName}! 👋 What's the best phone number to reach you? In case we need to confirm details or the tech is running ahead of schedule.`);
-      state.conversationStage = 'get_phone';
-      return;
-    }
-
-    // Phone collection
-    if (state.conversationStage === 'get_phone') {
-      state.prospectPhone = text;
-      const isAfterHours = new Date().getHours() >= 19 || new Date().getHours() < 7 || new Date().getDay() === 0;
-      
-      botReply(`Perfect, ${state.prospectName}! Here's what I've got:\n\n📋 Issue: ${state.prospectIssue}\n📞 Phone: ${state.prospectPhone}\n📍 Vancouver, WA area\n\nI've got you booked for our **earliest available slot — tomorrow between 9am-12pm**. You'll get a text confirmation shortly. Is that going to work?`);
-      
-      systemMessage("✅ Lead captured and sent to dispatch");
-      
-      addLead(state.prospectName, state.prospectPhone, state.prospectIssue, isAfterHours);
-      state.conversationStage = 'confirm';
-      return;
-    }
-
-    // Confirmation
-    if (state.conversationStage === 'confirm') {
-      if (lower.includes('yes') || lower.includes('yeah') || lower.includes('sure') || lower.includes('ok') || lower.includes('perfect') || lower.includes('works')) {
-        state.bookings++;
-        updateStats();
-        botReply(`🎉 You're all set, ${state.prospectName}! Your appointment is confirmed. You'll receive a text reminder tomorrow morning. Our technician will call you when they're 30 minutes away.\n\nIs there anything else I can help with?`);
-        systemMessage("📅 Appointment confirmed · Added to calendar");
-        state.conversationStage = 'done';
-      } else if (lower.includes('no') || lower.includes('different') || lower.includes('can\'t') || lower.includes('cant') || lower.includes('reschedule')) {
-        botReply("No problem! I can offer Thursday 2pm-5pm or Friday 7am-10am. Which works better?");
-        state.conversationStage = 'reschedule';
-      } else {
-        botReply("I want to make sure this works for you — does tomorrow 9am-12pm work, or would you prefer a different time?");
+    if (state.stage === "booking") {
+      if (text.toLowerCase().includes("another")) {
+        state.lead.slot = "Friday, 1:00-3:00 PM";
+        bot("No problem. I can offer Friday, 1:00-3:00 PM. Want that instead?");
+        setQuickReplies([{ label: "Yes, Friday works" }]);
+        updateDashboard();
+        return;
       }
+
+      state.stage = "booked";
+      state.completedSteps = 7;
+      state.metrics.bookings = Math.max(state.metrics.bookings, 1);
+      state.metrics.revenue = Math.max(state.metrics.revenue, scenario.value);
+      system("Appointment booked, dispatch packet created, SMS confirmation queued.");
+      bot("You are confirmed for " + state.lead.slot + ". The office has the details and you will get a text confirmation. If this becomes unsafe or urgent, call the emergency line immediately.");
+      setQuickReplies([{ label: "Restart demo", value: "restart" }]);
+      updateDashboard();
       return;
     }
 
-    if (state.conversationStage === 'reschedule') {
-      state.bookings++;
-      updateStats();
-      botReply(`Done! You're booked for ${text}. 🎉 You'll get a text confirmation shortly. Anything else I can help with?`);
-      systemMessage("📅 Appointment confirmed · Added to calendar");
-      state.conversationStage = 'done';
+    if (text.toLowerCase().includes("restart")) {
+      resetDemo();
       return;
     }
 
-    if (state.conversationStage === 'done') {
-      if (lower.includes('no') || lower.includes('that\'s it') || lower.includes('good') || lower.includes('thanks') || lower.includes('thank')) {
-        botReply("You're welcome! Stay warm out there. 🔥 If anything changes before your appointment, just text us here or call (360) 555-0142. Have a great day!");
-      } else {
-        botReply("I'm here if you need anything else! You can ask me about services, pricing, or scheduling anytime. 🔥");
-      }
-      return;
-    }
-
-    // Default / fallback
-    botReply("I can help with that! I'm the Cascade Heating assistant — I can get you a quote, book a service visit, or answer questions about your HVAC system. What's going on?");
+    bot("The lead is already booked. The owner dashboard now has the dispatch packet, estimated value, and workflow status.");
   }
 
-  // Simulate after-hours lead coming in (for demo effect)
-  setTimeout(() => {
-    if (state.leads.length === 0) {
-      systemMessage("💡 Try clicking a quick-reply button above to see how the bot captures leads");
+  function cleanName(value) {
+    return value
+      .replace(/^my name is /i, "")
+      .replace(/^i am /i, "")
+      .replace(/^i'm /i, "")
+      .trim() || "Homeowner";
+  }
+
+  function sendTyped() {
+    const input = document.getElementById("chatInput");
+    const value = input.value.trim();
+    if (!value) return;
+    input.value = "";
+    addMessage(value, "user");
+    handleText(value);
+  }
+
+  function focusChat() {
+    document.getElementById("chatInput").focus();
+    if (state.stage === "idle") {
+      bot("I am online now. Tell me what is happening with your heating or cooling system, and I will help book the right service window.");
     }
-  }, 3000);
+  }
+
+  function resetDemo() {
+    resetState();
+    document.getElementById("messages").innerHTML = "";
+    addMessage("Hi, I am Cascade's booking assistant. I can help with no heat, AC issues, maintenance, or replacement quotes. What is going on?", "bot");
+    setQuickReplies([
+      { label: "No heat after hours", value: scenarios["no-heat"].first },
+      { label: "AC leaking", value: scenarios["ac-leak"].first },
+      { label: "Book maintenance", value: scenarios["maintenance"].first },
+      { label: "Replacement quote", value: scenarios["quote"].first }
+    ]);
+    updateDashboard();
+  }
+
+  document.getElementById("chatInput").addEventListener("keydown", event => {
+    if (event.key === "Enter") sendTyped();
+  });
+
+  resetState();
+  resetDemo();
 </script>
-
 </body>
 </html>
