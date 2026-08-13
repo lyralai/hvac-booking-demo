@@ -12,7 +12,7 @@ A 24/7 AI-powered booking assistant for HVAC and home services companies. It liv
 ## Current Status
 
 ### ✅ Done
-- **Interactive front-end demo** (`demo/index.html`) — a clickable mockup showing the full customer experience for a fictional HVAC company ("Cascade Heating & Cooling"). Demonstrates lead capture, appointment booking, FAQ handling, and a live stats dashboard. Hosted at: https://lyralai.github.io/hvac-booking-demo/
+- **Interactive front-end demo** (`demo/index.html`) — a clickable mockup showing the full customer experience for a fictional HVAC company ("Cascade Heating & Cooling"). Demonstrates lead capture, appointment booking, FAQ handling, and a live stats dashboard. **🔗 Live Demo: https://lyralai.github.io/hvac-booking-demo/**
 
 ### 🔧 Next: Build the Real Working Version
 The demo is a sales mockup — hardcoded responses, no real AI, no real calendar connection. To sign real clients, we need:
